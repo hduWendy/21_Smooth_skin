@@ -40,12 +40,21 @@ int main()
 		cv::inRange(hsvMat, Scalar(i_minH, i_minS, i_minV), Scalar(i_maxH, i_maxS, i_maxV), detectMat);
 
 		rFrame.copyTo(smoothMat);
-		int ksize = 3;//卷积核尺寸
+		int ksize = 14;//卷积核尺寸(大于0)
+		int border;
+		if (ksize % 2 == 0)
+		{
+			border = ksize / 2;
+		}
+		else
+		{
+			border = (ksize - 1) / 2;
+		}
 		int height = detectMat.rows; //行数
 		int width = detectMat.cols; //每行元素的总元素数量
-		for (int j = 0; j<height; j++)
+		for (int j = border; j<height- border; j++)
 		{
-			for (int i = 0; i<width; i++)
+			for (int i = border; i < width - border; i++)
 			{
 				if (detectMat.at<uchar>(j, i) == 255)
 				{
@@ -56,10 +65,10 @@ int main()
 						{
 							for (int x = 0; x < ksize; x++)
 							{
-								average += rFrame.at<Vec3b>(j-1+y, i-1+x)[t];
+								average += rFrame.at<Vec3b>(j - border + y, i - border + x)[t];
 							}
 						}
-						average = average/(ksize*ksize);
+						average = average / (ksize * ksize);
 						smoothMat.at<Vec3b>(j, i)[t] = (int)average;
 					}
 				}
@@ -67,10 +76,11 @@ int main()
 			} //单行处理结束
 		}
 
-		cv::imshow("whie: in the range", detectMat);
+//		cv::imshow("whie: in the range", detectMat);
 		cv::imshow("frame", rFrame);
 		cv::imshow("smooth", smoothMat);
 
 		waitKey(30);
 	}
 }
+
